@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <input type="file" id="fileDate" accept="image/png, image/jpeg">
+    <button id="upload">upload</button>
+
+    <script>
+
+        const fileDate = document.getElementById("fileDate");
+        const upload = document.getElementById("upload");
+
+        const serverUrl = "http://localhost:7071/api/predictBlob"
+
+        upload.addEventListener("click" , async () =>{
+
+            try{
+
+                let img = fileDate.files[0]
+    
+                let reader = new FileReader();
+                reader.onload = async function(e) {
+
+                    let arrayBuffer = this.result
+                    let array = await new Uint8Array(arrayBuffer)
+
+                    console.log(arrayBuffer);
+                    console.log(array);
+    
+                    let res = await fetch(serverUrl, {
+                        method: 'POST',
+                        headers: { 'content-type': 'application/json' },
+                        body: JSON.stringify({
+                            data: array,
+                        })
+                    });
+    
+                    let req = await res.json();
+    
+                    console.log(req);
+    
+                }
+    
+                reader.readAsArrayBuffer(img);
+            }
+            catch(err){
+                console.log(err);
+                console.log("Invalid input.")
+            }
+
+            
+        })
+
+        // not in use, in-case
+        function getImagesWH(img){
+            return new Promise( (rec, rej) =>{
+                let imgNew = new Image()
+                imgNew.src = window.URL.createObjectURL(img)
+                imgNew.onload = () => {
+                    rec([imgNew.width, imgNew.height]);
+                }
+            })
+        }
+
+
+    </script>
+    
+</body>
+</html>
